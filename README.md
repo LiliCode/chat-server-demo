@@ -14,7 +14,8 @@
     ```shell
     sudo apt-get install sqlite3
     ```
-3. 执行命令运行
+3. 更改数据库的路径，在 `./lib/sqlite_db/database.dart` 文件中更改 `_dbPath` 变量 (已更改请忽略)
+4. 执行命令运行
     ```shell
     dart pub get
     dart run
