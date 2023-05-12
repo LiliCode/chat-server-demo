@@ -8,7 +8,7 @@
 
 下面以 Ubuntu 20.04 系统为例
 
-1. 安装 Dart 执行环境(已安装跳过)，地址: <https://dart.cn/get-dart>
+1. 安装 Dart 执行环境(已安装请跳过)，地址: <https://dart.cn/get-dart>
 2. 安装 Sqlite3 依赖
 
     ```shell
@@ -19,7 +19,7 @@
     dart pub get
     dart run
     ```
-    如果报一下错误:
+    如果报下面错误:
     ```
     Invalid argument(s): Failed to load dynamic library 'libsqlite3.so': libsqlite3.so: cannot open shared object file: No such file or directory
     ```
