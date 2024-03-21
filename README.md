@@ -29,7 +29,8 @@
     ```shell
     sudo apt-get install -y libsqlite3-dev
     ```
-5. 打包运行（AOT方式）
+    
+5. 打包运行（AOT方式，详情请参考官方文档 https://dart.cn/tools/dart-compile#aot-snapshot）
 
    1. 运行 `build_aot.sh` 这个 shell 脚本进行打包成可执行文件，格式 `sh build_aot.sh <可执行文件的输出路径>`
 
