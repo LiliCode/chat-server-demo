@@ -39,5 +39,6 @@ void runSever({String? bindIp}) async {
     return ResponseTools(ResponseStatus.error(description: '未定义的方法')).response;
   });
 
-  await app.listen(8090, bindIp ?? '0.0.0.0');
+  print('绑定的IP地址: $bindIp');
+  await app.listen(80, bindIp ?? '0.0.0.0');
 }
