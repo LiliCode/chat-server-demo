@@ -40,5 +40,5 @@ void runSever({String? bindIp}) async {
   });
 
   print('绑定的IP地址: $bindIp');
-  await app.listen(80, bindIp ?? '0.0.0.0');
+  await app.listen(3000, bindIp ?? '0.0.0.0');
 }
