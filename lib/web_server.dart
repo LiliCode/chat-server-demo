@@ -9,7 +9,7 @@ import 'package:dart_server_application/tools/response_tools.dart';
 // Track connected clients
 final users = <WebSocket>[];
 
-void runSever() async {
+void runSever({String? bindIp}) async {
   // 初始化数据库表
   ChatDBInit.init();
 
@@ -39,5 +39,5 @@ void runSever() async {
     return ResponseTools(ResponseStatus.error(description: '未定义的方法')).response;
   });
 
-  await app.listen(8090);
+  await app.listen(8090, bindIp ?? '0.0.0.0');
 }
