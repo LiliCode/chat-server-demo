@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dart_server_application/sqlite_db/database.dart';
-import 'package:dart_server_application/tools/response_tools.dart';
+import 'package:shelf/shelf.dart';
+
+import '../server/res.dart';
 
 class HomeController {
   /// 主页，用户列表
   ///
   /// 参数：id 自己的用户id，用来过滤自己
-  static FutureOr<dynamic> list(HttpRequest req, HttpResponse res) async {
-    res.headers.contentType = ContentType.json;
-    final params = req.uri.queryParameters;
+  static FutureOr<ResponseData> list(Request req) async {
+    final params = req.url.queryParameters;
     final String? id = params['id'];
     List<Map<String, dynamic>> list = [];
     ChatDB.perform((db) {
@@ -22,6 +23,6 @@ class HomeController {
 
     // print(list);
 
-    return ResponseTools(ResponseStatus.success(), info: list).response;
+    return ResponseData<List<Map<String, dynamic>>>.success(d: list);
   }
 }

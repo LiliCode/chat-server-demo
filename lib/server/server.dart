@@ -1,4 +1,4 @@
-import 'package:dart_server_application/server/request_handler.dart';
+import 'package:dart_server_application/server/route.dart';
 import 'package:dart_server_application/server/web_server.dart';
 
 class DartServer {
@@ -16,11 +16,11 @@ class DartServer {
   Future<void> run(
     String host, {
     int port = 8080,
-    WebServerRequestHandler? addHandler,
+    ApiRouteTable? table,
   }) async {
     // 启动 WebServer
     if (_webServer == null) {
-      _webServer = WebServer(host, port: port, requestHandler: addHandler);
+      _webServer = WebServer(host, port: port, table: table);
       await _webServer?.run();
     }
   }

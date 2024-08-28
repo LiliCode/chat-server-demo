@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dart_server_application/server/request_handler.dart';
+import 'package:dart_server_application/server/route.dart';
 import 'package:dart_server_application/server/server_protocol.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_router/shelf_router.dart';
 
 /// Web 服务器
 class WebServer implements ServerProtocol {
   final String host;
   final int? port;
-  final WebServerRequestHandler? requestHandler;
+  final ApiRouteTable? table;
 
   HttpServer? _server;
 
-  WebServer(this.host, {this.port, this.requestHandler});
+  WebServer(this.host, {this.port, this.table});
 
   bool _isRunning = false;
 
@@ -28,8 +29,26 @@ class WebServer implements ServerProtocol {
       return;
     }
 
-    final handler = Pipeline().addMiddleware(logRequests()).addHandler((request) async =>
-        await requestHandler?.onReceive(request) ?? await _echoRequest(request));
+    final router = Router();
+    router.get('/', (Request req) async => Response.ok('Hello world'));
+
+    if (table != null && table!.table.isNotEmpty) {
+      for (final r in table!.table) {
+        if (r.method == HttpMethod.get) {
+          router.get(r.name, (Request req) async {
+            final result = await r.handler?.call(req);
+            return Response.ok(result?.toString());
+          });
+        } else if (r.method == HttpMethod.post) {
+          router.post(r.name, (Request req) async {
+            final result = await r.handler?.call(req);
+            return Response.ok(result?.toString());
+          });
+        }
+      }
+    }
+
+    final handler = Pipeline().addMiddleware(logRequests()).addHandler(router);
     _server = await shelf_io.serve(handler, host, port ?? 8080);
     // Enable content compression
     _server!.autoCompress = true;

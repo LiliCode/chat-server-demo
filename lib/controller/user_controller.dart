@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
 
-import 'package:alfred/alfred.dart';
+import 'package:dart_server_application/server/res.dart';
 import 'package:dart_server_application/sqlite_db/database.dart';
-import 'package:dart_server_application/tools/response_tools.dart';
+import 'package:shelf/shelf.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class UserController {
   /// 获取用户数据
   ///
   /// 参数: id 或者 account
-  static FutureOr<dynamic> userInfo(HttpRequest req, HttpResponse res) async {
-    res.headers.contentType = ContentType.json;
-    final params = req.uri.queryParameters;
+  static FutureOr<ResponseData> userInfo(Request req) async {
+    final params = req.url.queryParameters;
     final String? account = params['account'];
     final String? id = params['id'];
 
@@ -27,12 +26,11 @@ class UserController {
         result = db.select('SELECT * FROM user WHERE id=?', [id]);
       });
     } else {
-      return ResponseTools(ResponseStatus.error(description: '缺少必要参数'))
-          .response;
+      return ResponseData.error('缺少必要参数');
     }
 
     if (result == null || (result != null && result!.isEmpty)) {
-      return ResponseTools(ResponseStatus.error(description: '用户不存在')).response;
+      return ResponseData.error('用户不存在');
     }
 
     // 用户数据存在
@@ -41,15 +39,17 @@ class UserController {
       info[key] = result!.first[key];
     }
 
-    return ResponseTools(ResponseStatus.success(), info: info).response;
+    return ResponseData<Map<String, dynamic>>.success(d: info);
   }
 
   /// 用户登陆
   ///
   /// 参数: password account
-  static FutureOr<dynamic> login(HttpRequest req, HttpResponse res) async {
-    res.headers.contentType = ContentType.json;
-    final params = await req.body as Map<String, dynamic>;
+  static FutureOr<ResponseData> login(Request req) async {
+    // final params = await req.body as Map<String, dynamic>;
+    final bodyString = await req.readAsString();
+    final params = jsonDecode(bodyString).cast<String, dynamic>();
+
     final String? account = params['account'];
     final String? pwd = params['password'];
 
@@ -60,19 +60,18 @@ class UserController {
         result = db.select('SELECT * FROM user WHERE account=?', [account]);
       });
     } else {
-      return ResponseTools(ResponseStatus.error(description: '缺少必要参数'))
-          .response;
+      return ResponseData.error('缺少必要参数');
     }
 
     if (result == null || (result != null && result!.isEmpty)) {
-      return ResponseTools(ResponseStatus.error(description: '用户不存在')).response;
+      return ResponseData.error('用户不存在');
     }
 
     // 用户数据存在
 
     // 判断密码是否正确
     if (result!.first['password'] != pwd) {
-      return ResponseTools(ResponseStatus.error(description: '密码错误')).response;
+      return ResponseData.error('密码错误');
     }
 
     final Map<String, dynamic> info = {};
@@ -80,23 +79,24 @@ class UserController {
       info[key] = result!.first[key];
     }
 
-    return ResponseTools(ResponseStatus.success(), info: info).response;
+    return ResponseData.success(d: info);
   }
 
-  static FutureOr<dynamic> update(HttpRequest req, HttpResponse res) {
+  static FutureOr<ResponseData> update(Request req) {
     print('修改信息');
-    res.headers.contentType = ContentType.json;
-    return ResponseTools(ResponseStatus.success()).response;
+    return ResponseData<Map<String, dynamic>>.success();
   }
 
   /// 用户注册接口
   ///
   /// 参数: account, password, name
-  static FutureOr<dynamic> register(HttpRequest req, HttpResponse res) async {
-    res.headers.contentType = ContentType.json;
-    final params = await req.body as Map<String, dynamic>;
+  static FutureOr<ResponseData> register(Request req) async {
+    // final params = await req.body as Map<String, dynamic>;
+    final bodyString = await req.readAsString();
+    final params = jsonDecode(bodyString).cast<String, dynamic>();
+
     if (params.isEmpty) {
-      return ResponseTools(ResponseStatus.error(description: '没有参数')).response;
+      return ResponseData.error('没有参数');
     }
 
     final String? account = params['account'] as String?;
@@ -104,8 +104,7 @@ class UserController {
     final String? name = params['name'] as String?;
 
     if (account == null || password == null || name == null) {
-      return ResponseTools(ResponseStatus.error(description: '缺少必要参数'))
-          .response;
+      return ResponseData.error('缺少必要参数');
     }
 
     // 查询数据
@@ -124,8 +123,7 @@ class UserController {
     });
 
     if (exists) {
-      return ResponseTools(ResponseStatus.error(description: '存在这个用户'))
-          .response;
+      return ResponseData.error('存在这个用户');
     }
 
     // 不存在这个用户
@@ -144,7 +142,6 @@ class UserController {
       print('注册成功');
     });
 
-    return ResponseTools(ResponseStatus.success(), info: {'msg': '注册成功'})
-        .response;
+    return ResponseData.success(d: {'msg': '注册成功'});
   }
 }
