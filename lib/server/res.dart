@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum ResStatus {
   success('success'),
   error('error');
@@ -26,5 +28,5 @@ class ResponseData<T> {
       {'status': status.value, 'reason': reason, 'data': data};
 
   @override
-  String toString() => toMap().toString();
+  String toString() => jsonEncode(toMap());
 }

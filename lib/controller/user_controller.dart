@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dart_server_application/extensions/string_extension.dart';
 import 'package:dart_server_application/server/res.dart';
 import 'package:dart_server_application/sqlite_db/database.dart';
 import 'package:shelf/shelf.dart';
@@ -47,8 +48,8 @@ class UserController {
   /// 参数: password account
   static FutureOr<ResponseData> login(Request req) async {
     // final params = await req.body as Map<String, dynamic>;
-    final bodyString = await req.readAsString();
-    final params = jsonDecode(bodyString).cast<String, dynamic>();
+    final bodyString = await req.readAsString(utf8);
+    final params = bodyString.toMap() ?? {};
 
     final String? account = params['account'];
     final String? pwd = params['password'];
@@ -92,8 +93,8 @@ class UserController {
   /// 参数: account, password, name
   static FutureOr<ResponseData> register(Request req) async {
     // final params = await req.body as Map<String, dynamic>;
-    final bodyString = await req.readAsString();
-    final params = jsonDecode(bodyString).cast<String, dynamic>();
+    final bodyString = await req.readAsString(utf8);
+    final params = bodyString.toMap() ?? {};
 
     if (params.isEmpty) {
       return ResponseData.error('没有参数');
