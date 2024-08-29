@@ -24,6 +24,13 @@ class ResponseData<T> {
 
   ResponseData.noImplement() : this(ResStatus.error, reason: '方法未实现');
 
+  ResponseData.fromJson(Map<String, dynamic>? json)
+      : this(
+          ResStatus.from(json?['status']),
+          reason: json?['reason'],
+          data: json?['data'] as T,
+        );
+
   Map<String, dynamic> toMap() =>
       {'status': status.value, 'reason': reason, 'data': data};
 
