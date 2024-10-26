@@ -24,8 +24,8 @@ class WebServer implements ServerProtocol {
 
   @override
   Future<void> run() async {
-    if (_server != null) {
-      print('Server running!!!');
+    if (_isRunning && _server != null) {
+      print('Server 正在运行!!!');
       return;
     }
 
@@ -59,7 +59,7 @@ class WebServer implements ServerProtocol {
 
   @override
   Future<void> stop({bool? force}) async {
-    _server?.close(force: force ?? false);
+    await _server?.close(force: force ?? false);
     _server = null;
     _isRunning = false;
   }

@@ -1,9 +1,11 @@
 import 'package:dart_server_application/server/route.dart';
+import 'package:dart_server_application/server/socket_server.dart';
 import 'package:dart_server_application/server/web_server.dart';
 
 class DartServer {
   static final _shared = DartServer._();
   WebServer? _webServer;
+  SocketServer? _socketServer;
 
   DartServer._();
 
@@ -16,6 +18,7 @@ class DartServer {
   Future<void> run(
     String host, {
     int port = 8080,
+    int socketPort = 3000,
     ApiRouteTable? table,
   }) async {
     // 启动 WebServer
@@ -23,10 +26,16 @@ class DartServer {
       _webServer = WebServer(host, port: port, table: table);
       await _webServer?.run();
     }
+
+    if (_socketServer == null) {
+      _socketServer = SocketServer(host, port: socketPort);
+      await _socketServer?.run();
+    }
   }
 
   /// 停止服务器
   Future<void> stop() async {
     await _webServer?.stop();
+    await _socketServer?.stop();
   }
 }
