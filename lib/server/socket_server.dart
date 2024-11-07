@@ -27,7 +27,8 @@ class SocketServer implements ServerProtocol {
     // 处理 Socket 通信
     final handler = webSocketHandler((webSocket) {
       webSocket.stream.listen((message) {
-        webSocket.sink.add("Hello world!!!");
+        print('服务端收到消息: $message');
+        webSocket.sink.add("Hello client!!!");
       });
     });
 
