@@ -2,13 +2,16 @@ import 'dart:convert';
 
 enum ResStatus {
   success('success'),
-  error('error');
+  error('error'),
+  noImplement('noImplement'),
+  exception('exception');
 
   final String value;
 
   const ResStatus(this.value);
 
-  static ResStatus from(String value) => values.firstWhere((e) => e.value == value);
+  static ResStatus from(String value) =>
+      values.firstWhere((e) => e.value == value);
 }
 
 class ResponseData<T> {
@@ -22,7 +25,10 @@ class ResponseData<T> {
 
   ResponseData.error(String? reason) : this(ResStatus.error, reason: reason);
 
-  ResponseData.noImplement() : this(ResStatus.error, reason: '方法未实现');
+  ResponseData.noImplement() : this(ResStatus.noImplement, reason: '方法未实现');
+
+  ResponseData.exception({String? reason})
+      : this(ResStatus.exception, reason: reason);
 
   ResponseData.fromJson(Map<String, dynamic>? json)
       : this(
