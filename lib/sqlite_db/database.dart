@@ -1,6 +1,6 @@
 import 'package:sqlite3/sqlite3.dart';
 
-const String _dbPath = '/Users/andy/Documents/Code/Database/chatapp.db';
+const String _dbPath = '/Users/lili/Documents/Code/Database/chatapp.db';
 // const String _dbPath = '/root/chat-server/db/chatapp.db';
 
 class ChatDB {

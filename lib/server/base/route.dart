@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:dart_server_application/server/res.dart';
+import 'package:dart_server_application/server/base/res.dart';
 import 'package:shelf/shelf.dart';
 
 enum HttpMethod { get, post, put, delete }

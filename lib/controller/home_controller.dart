@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:dart_server_application/sqlite_db/database.dart';
 import 'package:shelf/shelf.dart';
 
-import '../server/res.dart';
+import '../server/base/res.dart';
 
 class HomeController {
   /// 主页，用户列表

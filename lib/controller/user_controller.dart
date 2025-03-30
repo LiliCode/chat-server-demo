@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dart_server_application/extensions/string_extension.dart';
-import 'package:dart_server_application/server/res.dart';
+import 'package:dart_server_application/server/base/res.dart';
 import 'package:dart_server_application/sqlite_db/database.dart';
 import 'package:shelf/shelf.dart';
 import 'package:sqlite3/sqlite3.dart';

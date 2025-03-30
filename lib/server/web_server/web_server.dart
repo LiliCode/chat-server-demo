@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dart_server_application/server/route.dart';
-import 'package:dart_server_application/server/server_protocol.dart';
+import 'package:dart_server_application/server/base/route.dart';
+import 'package:dart_server_application/server/base/server_protocol.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';

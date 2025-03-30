@@ -1,7 +1,8 @@
-import 'package:dart_server_application/server/route.dart';
-import 'package:dart_server_application/server/socket_server.dart';
-import 'package:dart_server_application/server/web_server.dart';
+import 'package:dart_server_application/server/base/route.dart';
+import 'package:dart_server_application/server/socket_server/socket_server.dart';
+import 'package:dart_server_application/server/web_server/web_server.dart';
 
+/// Dart 服务器
 class DartServer {
   static final _shared = DartServer._();
   WebServer? _webServer;
@@ -27,6 +28,7 @@ class DartServer {
       await _webServer?.run();
     }
 
+    // 启动 SocketServer
     if (_socketServer == null) {
       _socketServer = SocketServer(host, port: socketPort);
       await _socketServer?.run();
