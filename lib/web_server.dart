@@ -1,10 +1,16 @@
-import 'package:dart_server_application/routes/api_routes.dart' as route;
 import 'package:dart_server_application/server/server.dart';
+import 'package:dart_server_application/services/im_services/im_service.dart';
+import 'package:dart_server_application/services/user_services/home_service.dart';
+import 'package:dart_server_application/services/user_services/user_service.dart';
 import 'package:dart_server_application/sqlite_db/db_init.dart';
 
 void runSever({String? bindIp}) async {
   // 初始化数据库表
   ChatDBInit.init();
 
-  await DartServer().run(bindIp ?? '0.0.0.0', table: route.HttpRouteTable());
+  // 运行服务
+  await DartServer().run(
+    bindIp ?? '0.0.0.0',
+    services: [HomeService(), UserService(), ImService()],
+  );
 }

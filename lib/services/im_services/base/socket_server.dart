@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_server_application/server/base/server_protocol.dart';
-import 'package:dart_server_application/server/socket_server/socket_user.dart';
-import 'package:dart_server_application/server/socket_server/socket_user_task.dart';
-import 'package:dart_server_application/server/socket_server/socket_user_task_center.dart';
+import 'package:dart_server_application/services/im_services/base/socket_message_handle.dart';
+import 'package:dart_server_application/services/im_services/base/socket_user.dart';
+import 'package:dart_server_application/services/im_services/base/socket_user_task.dart';
+import 'package:dart_server_application/services/im_services/base/socket_user_task_center.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
@@ -38,13 +40,21 @@ class SocketServer implements ServerProtocol {
       final handler = webSocketHandler((channel, protocol) {
         // 创建一个连接的用户对象
         final user = SocketUser(channel: channel, headers: request.headers);
+        // 创建消息处理
+        final handler = SocketMessageHandle(user);
 
         // 加入任务
-        _taskCenter.addSocketUser(SocketUserTask(user));
+        _taskCenter.addSocketUser(SocketUserTask(user, handler: handler));
       });
 
       // WebSocket 连接是通过 HTTP 升级请求建立的，可以在处理升级请求时访问 headers
       handler(request);
+    });
+
+    router.post('/receive', (Request request) async {
+      final body = await request.readAsString();
+      print('收到了消息: $body');
+      return Response.ok(jsonEncode({'code': 200}));
     });
 
     // 启动 Socket 服务

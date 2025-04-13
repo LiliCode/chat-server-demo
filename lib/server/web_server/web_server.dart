@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dart_server_application/server/base/route.dart';
+import 'package:dart_server_application/server/base/req_method.dart';
 import 'package:dart_server_application/server/base/server_protocol.dart';
+import 'package:dart_server_application/server/base/service_api.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
@@ -11,11 +12,11 @@ import 'package:shelf_router/shelf_router.dart';
 class WebServer implements ServerProtocol {
   final String host;
   final int? port;
-  final ApiRouteTable? table;
+  final List<ServiceApi>? serviceTable;
 
   HttpServer? _server;
 
-  WebServer(this.host, {this.port, this.table});
+  WebServer(this.host, {this.port, this.serviceTable});
 
   bool _isRunning = false;
 
@@ -32,18 +33,26 @@ class WebServer implements ServerProtocol {
     final router = Router();
     router.get('/', (Request req) async => Response.ok('Hello world'));
 
-    if (table != null && table!.table.isNotEmpty) {
-      for (final r in table!.table) {
-        if (r.method == HttpMethod.get) {
-          router.get(r.name, (Request req) async {
-            final result = await r.handler?.call(req);
-            return Response.ok(result?.toString());
-          });
-        } else if (r.method == HttpMethod.post) {
-          router.post(r.name, (Request req) async {
-            final result = await r.handler?.call(req);
-            return Response.ok(result?.toString());
-          });
+    if (serviceTable != null && serviceTable!.isNotEmpty) {
+      for (final service in serviceTable!) {
+        for (final methodName in service.actions.keys) {
+          final action = service.actions[methodName];
+          if (action == null) continue;
+
+          final path = '/${service.name.value}/$methodName';
+          if (action.method == ReqMethod.post) {
+            router.post(path, (Request req) async {
+              final res = await action.handler.call(req);
+              return Response.ok(res.toString());
+            });
+          } else if (action.method == ReqMethod.get) {
+            router.get(path, (Request req) async {
+              final res = await action.handler.call(req);
+              return Response.ok(res.toString());
+            });
+          } else {
+            print('不支持的接口: $path');
+          }
         }
       }
     }

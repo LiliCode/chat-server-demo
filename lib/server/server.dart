@@ -1,12 +1,11 @@
-import 'package:dart_server_application/server/base/route.dart';
-import 'package:dart_server_application/server/socket_server/socket_server.dart';
 import 'package:dart_server_application/server/web_server/web_server.dart';
+
+import 'base/service_api.dart';
 
 /// Dart 服务器
 class DartServer {
   static final _shared = DartServer._();
   WebServer? _webServer;
-  SocketServer? _socketServer;
 
   DartServer._();
 
@@ -20,24 +19,17 @@ class DartServer {
     String host, {
     int port = 8080,
     int socketPort = 3000,
-    ApiRouteTable? table,
+    List<ServiceApi>? services,
   }) async {
     // 启动 WebServer
     if (_webServer == null) {
-      _webServer = WebServer(host, port: port, table: table);
+      _webServer = WebServer(host, port: port, serviceTable: services);
       await _webServer?.run();
-    }
-
-    // 启动 SocketServer
-    if (_socketServer == null) {
-      _socketServer = SocketServer(host, port: socketPort);
-      await _socketServer?.run();
     }
   }
 
   /// 停止服务器
   Future<void> stop() async {
     await _webServer?.stop();
-    await _socketServer?.stop();
   }
 }

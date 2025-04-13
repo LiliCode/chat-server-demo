@@ -10,3 +10,8 @@ abstract class SocketTask {
   Future<void> onStart() async {}
   Future<void> onStop() async {}
 }
+
+/// 消息处理
+abstract class MessageHandle {
+  Future<void> onMessage(dynamic message) async {}
+}

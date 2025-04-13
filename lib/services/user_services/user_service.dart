@@ -1,17 +1,31 @@
-import 'dart:async';
 import 'dart:convert';
 
+import 'package:dart_server_application/server/base/req_method.dart';
+import 'package:dart_server_application/enums/service_name.dart';
 import 'package:dart_server_application/extensions/string_extension.dart';
+import 'package:dart_server_application/server/base/service_api.dart';
 import 'package:dart_server_application/server/base/res.dart';
-import 'package:dart_server_application/sqlite_db/database.dart';
-import 'package:shelf/shelf.dart';
-import 'package:sqlite3/sqlite3.dart';
+import 'package:shelf/src/request.dart';
+import 'package:sqlite3/common.dart';
 
-class UserController {
+import '../../sqlite_db/database.dart';
+
+class UserService implements ServiceApi {
+  @override
+  Map<String, ServiceAction> get actions => {
+        'info': ServiceAction(handler: userInfo),
+        'login': ServiceAction(method: ReqMethod.post, handler: login),
+        'update': ServiceAction(method: ReqMethod.post, handler: update),
+        'register': ServiceAction(method: ReqMethod.post, handler: register),
+      };
+
+  @override
+  ServiceName get name => ServiceName.user;
+
   /// 获取用户数据
   ///
   /// 参数: id 或者 account
-  static FutureOr<ResultData> userInfo(Request req) async {
+  Future<ResultData> userInfo(Request req) async {
     final params = req.url.queryParameters;
     final String? account = params['account'];
     final String? id = params['id'];
@@ -40,13 +54,13 @@ class UserController {
       info[key] = result!.first[key];
     }
 
-    return ResultData<Map<String, dynamic>>.success(info);
+    return ResultData.success(info);
   }
 
   /// 用户登陆
   ///
   /// 参数: password account
-  static FutureOr<ResultData> login(Request req) async {
+  Future<ResultData> login(Request req) async {
     // final params = await req.body as Map<String, dynamic>;
     final bodyString = await req.readAsString(utf8);
     final params = bodyString.toMap() ?? {};
@@ -83,7 +97,7 @@ class UserController {
     return ResultData.success(info);
   }
 
-  static FutureOr<ResultData> update(Request req) {
+  Future<ResultData> update(Request req) async {
     print('修改信息');
     return ResultData.success(null);
   }
@@ -91,7 +105,7 @@ class UserController {
   /// 用户注册接口
   ///
   /// 参数: account, password, name
-  static FutureOr<ResultData> register(Request req) async {
+  Future<ResultData> register(Request req) async {
     // final params = await req.body as Map<String, dynamic>;
     final bodyString = await req.readAsString(utf8);
     final params = bodyString.toMap() ?? {};
@@ -145,4 +159,7 @@ class UserController {
 
     return ResultData.success({'msg': '注册成功'});
   }
+
+  @override
+  Future<void> dispose() async {}
 }

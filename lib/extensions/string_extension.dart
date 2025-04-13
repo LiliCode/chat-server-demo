@@ -2,7 +2,13 @@ import 'dart:convert';
 
 extension StringBody on String {
   Map<String, dynamic>? toMap() {
-    final object = jsonDecode(this);
+    dynamic object;
+    try {
+      object = jsonDecode(this);
+    } catch (e) {
+      print('解析出错: $e');
+    }
+
     if (object != null) {
       return object.cast<String, dynamic>();
     }

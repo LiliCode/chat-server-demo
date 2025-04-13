@@ -10,36 +10,36 @@ enum ResStatus {
 
   const ResStatus(this.value);
 
-  static ResStatus from(String value) =>
-      values.firstWhere((e) => e.value == value);
+  static ResStatus from(String value) => values
+      .firstWhere((e) => e.value == value, orElse: () => ResStatus.noImplement);
 }
 
-class ResponseData<T> {
+class ResultData<T> {
   final ResStatus status;
   final String? reason;
   final T? data;
 
-  ResponseData(this.status, {this.reason, this.data});
+  ResultData(this.status, {this.reason, this.data});
 
-  ResponseData.success({T? d}) : this(ResStatus.success, data: d);
+  ResultData.success(T? d) : this(ResStatus.success, data: d);
 
-  ResponseData.error(String? reason) : this(ResStatus.error, reason: reason);
+  ResultData.error(String? reason) : this(ResStatus.error, reason: reason);
 
-  ResponseData.noImplement() : this(ResStatus.noImplement, reason: '方法未实现');
+  ResultData.noImplement() : this(ResStatus.noImplement, reason: '方法未实现');
 
-  ResponseData.exception({String? reason})
+  ResultData.exception({String? reason})
       : this(ResStatus.exception, reason: reason);
 
-  ResponseData.fromJson(Map<String, dynamic>? json)
+  ResultData.fromJson(Map<String, dynamic>? json)
       : this(
           ResStatus.from(json?['status']),
           reason: json?['reason'],
           data: json?['data'] as T,
         );
 
-  Map<String, dynamic> toMap() =>
+  Map<String, dynamic> toJson() =>
       {'status': status.value, 'reason': reason, 'data': data};
 
   @override
-  String toString() => jsonEncode(toMap());
+  String toString() => jsonEncode(toJson());
 }
