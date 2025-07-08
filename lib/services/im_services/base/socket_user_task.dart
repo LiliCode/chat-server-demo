@@ -24,7 +24,7 @@ class SocketUserTask implements SocketTask {
     _socketSubscription = user.channel.stream.listen(
       handler?.onMessage,
       onDone: () {
-        print('有用户断开连接: ${user.headers['id']}');
+        print('用户 ${user.id} 断开连接');
         // 回调
         delegate?.didReceiveDisconnect(user);
       },
@@ -32,6 +32,8 @@ class SocketUserTask implements SocketTask {
         print('ERROR: $e');
       },
     );
+
+    print('用户 ${user.id} 连接成功...');
   }
 
   @override
