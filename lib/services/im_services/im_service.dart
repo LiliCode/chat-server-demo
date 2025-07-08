@@ -5,6 +5,7 @@ import 'package:dart_server_application/extensions/string_extension.dart';
 import 'package:dart_server_application/server/base/req_method.dart';
 import 'package:dart_server_application/server/base/res.dart';
 import 'package:dart_server_application/server/base/service_api.dart';
+import 'package:dart_server_application/services/im_services/models/message.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
@@ -48,8 +49,18 @@ class ImService implements ServiceApi {
   /// 客户端发送消息的接口
   Future<ResultData> send(Request req) async {
     final bodyString = await req.readAsString(utf8);
-    final params = bodyString.toMap() ?? {};
-    print('收到客户端消息: $params');
+    final body = bodyString.toMap() ?? {};
+    print('收到客户端消息: $body');
+
+    final message = Message.fromJson(body);
+    final userTask = _taskCenter.getUserTaskById(message.to);
+    if (userTask == null) {
+      print('用户 ${message.to} 不存在或者未连接');
+      // TODO 缓存消息，等待对方上线之后统一推送给对方
+    } else {
+      // 对方在线，立即向对方转发消息
+      userTask?.user.send(bodyString);
+    }
 
     return ResultData.success('ok');
   }

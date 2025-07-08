@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+/// 返回值的状态
 enum ResStatus {
   success('success'),
   error('error'),
@@ -14,6 +15,7 @@ enum ResStatus {
       .firstWhere((e) => e.value == value, orElse: () => ResStatus.noImplement);
 }
 
+/// 返回结果的数据结构
 class ResultData<T> {
   final ResStatus status;
   final String? reason;
@@ -37,8 +39,15 @@ class ResultData<T> {
           data: json?['data'] as T,
         );
 
-  Map<String, dynamic> toJson() =>
-      {'status': status.value, 'reason': reason, 'data': data};
+  /// 转换成字典
+  Map<String, dynamic> toJson() {
+    final dict = <String, dynamic>{};
+    dict['status'] = status.value;
+    if (reason != null) dict['reason'] = reason;
+    if (data != null) dict['data'] = data;
+
+    return dict;
+  }
 
   @override
   String toString() => jsonEncode(toJson());

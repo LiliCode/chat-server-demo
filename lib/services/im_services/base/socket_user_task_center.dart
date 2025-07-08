@@ -44,6 +44,13 @@ class SocketUserTaskCenter implements SocketUserTaskDelegate {
     }
   }
 
+  /// 根据 id 获取连接任务
+  SocketUserTask? getUserTaskById(String id) {
+    if (id.isEmpty) return null;
+
+    return _taskPool[id];
+  }
+
   @override
   Future<void> didReceiveDisconnect(SocketUser user) async {
     removeSocketUser(user.id);
