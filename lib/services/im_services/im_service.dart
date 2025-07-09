@@ -59,7 +59,7 @@ class ImService implements ServiceApi {
       // TODO 缓存消息，等待对方上线之后统一推送给对方
     } else {
       // 对方在线，立即向对方转发消息
-      userTask?.user.send(bodyString);
+      userTask.user.send(bodyString);
     }
 
     return ResultData.success('ok');

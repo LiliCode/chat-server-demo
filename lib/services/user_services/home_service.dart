@@ -1,10 +1,10 @@
-import 'package:dart_server_application/server/base/req_method.dart';
+import 'package:dart_server_application/isar_models/user.dart';
 import 'package:dart_server_application/enums/service_name.dart';
 import 'package:dart_server_application/server/base/service_api.dart';
 import 'package:dart_server_application/server/base/res.dart';
+import 'package:dart_server_application/sqlite_db/db_init.dart';
+import 'package:isar/isar.dart';
 import 'package:shelf/src/request.dart';
-
-import '../../sqlite_db/database.dart';
 
 /// 首页服务
 class HomeService implements ServiceApi {
@@ -21,18 +21,12 @@ class HomeService implements ServiceApi {
   /// 参数：id 自己的用户id，用来过滤自己
   Future<ResultData> list(Request req) async {
     final params = req.url.queryParameters;
-    final String? id = params['id'];
-    List<Map<String, dynamic>> list = [];
-    ChatDB.perform((db) {
-      final result = db.select('SELECT * FROM user WHERE id != ?', [id]);
-      list = result.map((e) {
-        return e.map<String, dynamic>((key, value) => MapEntry(key, value));
-      }).toList();
-    });
+    final id = params['id'];
 
-    // print(list);
+    final list =
+        await GetIsar().instance.users.filter().idGreaterThan(0).findAll();
 
-    return ResultData.success(list);
+    return ResultData.success(list.map((e) => e.toJson()).toList());
   }
 
   @override

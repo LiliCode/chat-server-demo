@@ -1,14 +1,15 @@
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:dart_server_application/isar_models/user.dart';
 import 'package:dart_server_application/server/base/req_method.dart';
 import 'package:dart_server_application/enums/service_name.dart';
 import 'package:dart_server_application/extensions/string_extension.dart';
 import 'package:dart_server_application/server/base/service_api.dart';
 import 'package:dart_server_application/server/base/res.dart';
+import 'package:dart_server_application/sqlite_db/db_init.dart';
+import 'package:isar/isar.dart';
 import 'package:shelf/src/request.dart';
-import 'package:sqlite3/common.dart';
-
-import '../../sqlite_db/database.dart';
 
 class UserService implements ServiceApi {
   @override
@@ -30,71 +31,69 @@ class UserService implements ServiceApi {
     final String? account = params['account'];
     final String? id = params['id'];
 
-    ResultSet? result;
-
+    User? user;
     if (account != null) {
-      ChatDB.perform((db) {
-        result = db.select('SELECT * FROM user WHERE account=?', [account]);
-      });
+      final results = await GetIsar()
+          .instance
+          .users
+          .filter()
+          .accountEqualTo(account)
+          .findAll();
+
+      if (results.isNotEmpty) {
+        user = results.first;
+      }
     } else if (id != null) {
-      ChatDB.perform((db) {
-        result = db.select('SELECT * FROM user WHERE id=?', [id]);
-      });
-    } else {
-      return ResultData.error('缺少必要参数');
+      final results = await GetIsar()
+          .instance
+          .users
+          .filter()
+          .idEqualTo(int.tryParse(id) ?? -1)
+          .findAll();
+
+      if (results.isNotEmpty) {
+        user = results.first;
+      }
     }
 
-    if (result == null || (result != null && result!.isEmpty)) {
-      return ResultData.error('用户不存在');
+    if (user != null) {
+      return ResultData.success(user.toJson());
     }
 
-    // 用户数据存在
-    final Map<String, dynamic> info = {};
-    for (final key in result!.first.keys) {
-      info[key] = result!.first[key];
-    }
-
-    return ResultData.success(info);
+    return ResultData.error('用户不存在!');
   }
 
   /// 用户登陆
   ///
   /// 参数: password account
   Future<ResultData> login(Request req) async {
-    // final params = await req.body as Map<String, dynamic>;
     final bodyString = await req.readAsString(utf8);
     final params = bodyString.toMap() ?? {};
 
-    final String? account = params['account'];
-    final String? pwd = params['password'];
+    final account = '${params['account'] ?? ''}';
+    final pwd = '${params['password'] ?? ''}';
 
-    ResultSet? result;
+    if (account.isNotEmpty && pwd.isNotEmpty) {
+      final results = await GetIsar()
+          .instance
+          .users
+          .filter()
+          .accountEqualTo(account)
+          .findAll();
 
-    if (account != null && pwd != null) {
-      ChatDB.perform((db) {
-        result = db.select('SELECT * FROM user WHERE account=?', [account]);
-      });
+      if (results.isEmpty) {
+        return ResultData.error('用户不存在!');
+      }
+
+      final user = results.first;
+      if (user.password == pwd) {
+        return ResultData.success(user.toJson());
+      } else {
+        return ResultData.error('密码错误');
+      }
     } else {
       return ResultData.error('缺少必要参数');
     }
-
-    if (result == null || (result != null && result!.isEmpty)) {
-      return ResultData.error('用户不存在');
-    }
-
-    // 用户数据存在
-
-    // 判断密码是否正确
-    if (result!.first['password'] != pwd) {
-      return ResultData.error('密码错误');
-    }
-
-    final Map<String, dynamic> info = {};
-    for (final key in result!.first.keys) {
-      info[key] = result!.first[key];
-    }
-
-    return ResultData.success(info);
   }
 
   Future<ResultData> update(Request req) async {
@@ -122,39 +121,28 @@ class UserService implements ServiceApi {
       return ResultData.error('缺少必要参数');
     }
 
-    // 查询数据
-    bool exists = false;
-    ChatDB.perform((db) {
-      // 查询是否存在这个用户
-      final result = db.select(
-        'SELECT count(*) as account FROM user where account=\'$account\'',
-      );
-      for (final row in result) {
-        final count = row['account'] as int;
-        if (count != 0) {
-          exists = true;
-        }
-      }
-    });
-
-    if (exists) {
-      return ResultData.error('存在这个用户');
+    // 查找是否存在这个用户名的用户
+    final count =
+        await GetIsar().instance.users.filter().accountEqualTo(account).count();
+    if (count > 0) {
+      return ResultData.error('用户名存在，请更改用户名');
     }
 
     // 不存在这个用户
-    ChatDB.perform((db) {
-      // 注册新用户
-      db.execute(
-        'INSERT INTO user(account, password, name, avatar) VALUES(?, ?, ?, ?)',
-        [
-          account,
-          password,
-          name,
-          'https://pics1.baidu.com/feed/e1fe9925bc315c608b761f58256338154b5477fb.png?token=dc11f5e24ed77b8362acdebf5f85a212',
-        ],
-      );
+    final avatars = [
+      'https://ww1.sinaimg.cn/mw690/005J4OU5ly1huxb0v5u9uj30u00u0mzv.jpg',
+      'https://img2.woyaogexing.com/2021/08/12/4eb9e0a3d689453295ae9cbd977db75a%21400x400.jpeg',
+      'https://ww4.sinaimg.cn/mw690/006upAuggy1i2gwhhinisj30u00u0n0v.jpg',
+      'https://img2.baidu.com/it/u=504955003,2030954079&fm=253&app=138&f=JPEG?w=843&h=800',
+      'https://img1.baidu.com/it/u=1708316691,2822640255&fm=253&fmt=auto&app=138&f=JPEG?w=400&h=400'
+    ];
 
-      print('注册成功');
+    final avatar = avatars[Random().nextInt(5)];
+
+    final user =
+        User(name: name, account: account, password: password, avatar: avatar);
+    await GetIsar().instance.writeTxn(() async {
+      await GetIsar().instance.users.put(user);
     });
 
     return ResultData.success({'msg': '注册成功'});

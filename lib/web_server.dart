@@ -6,7 +6,7 @@ import 'package:dart_server_application/sqlite_db/db_init.dart';
 
 void runSever({String? bindIp}) async {
   // 初始化数据库表
-  ChatDBInit.init();
+  await GetIsar().initialized();
 
   // 运行服务
   await DartServer().run(
