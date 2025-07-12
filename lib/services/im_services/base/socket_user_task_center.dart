@@ -2,8 +2,8 @@ import 'package:dart_server_application/isar_models/user.dart';
 import 'package:dart_server_application/services/im_services/base/socket_user.dart';
 import 'package:dart_server_application/services/im_services/base/socket_user_task.dart';
 
+import '../../../isar/get_isar.dart';
 import '../../../server/base/status_code.dart';
-import '../../../sqlite_db/db_init.dart';
 
 /// 任务中心，用于管理连接的 SocketUser
 class SocketUserTaskCenter implements SocketUserTaskDelegate {

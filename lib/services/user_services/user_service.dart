@@ -7,7 +7,7 @@ import 'package:dart_server_application/enums/service_name.dart';
 import 'package:dart_server_application/extensions/string_extension.dart';
 import 'package:dart_server_application/server/base/service_api.dart';
 import 'package:dart_server_application/server/base/res.dart';
-import 'package:dart_server_application/sqlite_db/db_init.dart';
+import 'package:dart_server_application/isar/get_isar.dart';
 import 'package:isar/isar.dart';
 import 'package:shelf/src/request.dart';
 
