@@ -39,7 +39,7 @@ EOF
 
 # 3. 创建后台运行脚本
 echo "正在创建后台运行脚本..."
-cat > "$OUTPUT_DIR/run_in_background.sh" <<EOF
+cat > "$OUTPUT_DIR/run-in-background.sh" <<EOF
 #!/bin/bash
 # 后台运行 Dart AOT 程序的脚本
 nohup sh ./$EXECUTABLE_NAME.sh > output.log 2>&1 &
@@ -53,7 +53,7 @@ DART_RUNTIME=$(which dartaotruntime)
 if [ -f "$DART_RUNTIME" ]; then
     cp "$DART_RUNTIME" "$OUTPUT_DIR/"
 else
-    echo "警告: 无法找到dartaotruntime, 独立可执行文件可能无法工作"
+    echo "警告: 无法找到 dartaotruntime, 独立可执行文件可能无法工作"
 fi
 
 # 使可执行文件可执行
