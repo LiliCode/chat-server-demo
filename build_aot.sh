@@ -12,12 +12,6 @@ fi
 OUTPUT_DIR=$1
 EXECUTABLE_NAME=${2:-"run-chat-server"}
 
-# 检查Dart是否安装
-if ! command -v dart &> /dev/null; then
-    echo "错误: Dart SDK未安装或未在PATH中"
-    exit 1
-fi
-
 # 创建输出目录
 mkdir -p "$OUTPUT_DIR"
 
