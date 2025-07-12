@@ -33,23 +33,20 @@ cp ./bin/libisar.so "$OUTPUT_DIR/libisar.so"
 echo "正在创建运行脚本..."
 cat > "$OUTPUT_DIR/$EXECUTABLE_NAME.sh" <<EOF
 #!/bin/bash
-# 运行Dart AOT程序的脚本
+# 运行 Dart AOT 程序的脚本
 dartaotruntime "$EXECUTABLE_NAME.aot" "\$@"
+EOF
+
+# 3. 创建后台运行脚本
+echo "正在创建后台运行脚本..."
+cat > "$OUTPUT_DIR/run_in_background.sh" <<EOF
+#!/bin/bash
+# 后台运行 Dart AOT 程序的脚本
+nohup sh ./$EXECUTABLE_NAME.sh > output.log 2>&1 &
 EOF
 
 # 使脚本可执行
 chmod +x "$OUTPUT_DIR/$EXECUTABLE_NAME.sh"
-
-# 3. (可选) 打包为独立可执行文件
-# 注意: 这需要dartaotruntime和.aot文件一起分发
-echo "正在打包为独立可执行文件..."
-cat > "$OUTPUT_DIR/$EXECUTABLE_NAME" <<EOF
-#!/bin/bash
-# 获取脚本所在目录
-DIR=\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-# 运行AOT程序
-exec "\$DIR/dartaotruntime" "$EXECUTABLE_NAME.aot" "\$@"
-EOF
 
 # 复制dartaotruntime到输出目录
 DART_RUNTIME=$(which dartaotruntime)
