@@ -11,6 +11,7 @@ void runSever({String? bindIp}) async {
   // 运行服务
   await DartServer().run(
     bindIp ?? '0.0.0.0',
+    port: 9527,
     services: [HomeService(), UserService(), ImService()],
   );
 }
