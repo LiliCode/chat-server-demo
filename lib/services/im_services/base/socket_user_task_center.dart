@@ -7,6 +7,12 @@ import '../../../server/base/status_code.dart';
 
 /// 任务中心，用于管理连接的 SocketUser
 class SocketUserTaskCenter implements SocketUserTaskDelegate {
+  static final _instance = SocketUserTaskCenter._();
+
+  SocketUserTaskCenter._();
+
+  factory SocketUserTaskCenter() => _instance;
+
   final _taskPool = <String, SocketUserTask>{};
 
   /// 把新的 user 添加进任务中心

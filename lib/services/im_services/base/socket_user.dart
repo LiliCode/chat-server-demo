@@ -1,5 +1,4 @@
 import 'package:dart_server_application/server/base/status_code.dart';
-import 'package:dart_server_application/services/im_services/models/message.dart';
 import 'package:web_socket_channel/io.dart';
 
 /// Socket 连接的用户对象

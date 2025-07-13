@@ -1,3 +1,5 @@
+import 'package:dart_server_application/services/im_services/models/message.dart';
+
 /// 服务协议
 abstract class ServerProtocol {
   bool get isRunning;
@@ -13,5 +15,5 @@ abstract class SocketTask {
 
 /// 消息处理
 abstract class MessageHandle {
-  Future<void> onMessage(dynamic message) async {}
+  Future<void> onMessage(ConnectType type, String message) async {}
 }

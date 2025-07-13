@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:dart_server_application/enums/service_name.dart';
-import 'package:dart_server_application/extensions/string_extension.dart';
 import 'package:dart_server_application/server/base/req_method.dart';
 import 'package:dart_server_application/server/base/res.dart';
 import 'package:dart_server_application/server/base/service_api.dart';
+import 'package:dart_server_application/services/im_services/base/offline_message_buffer.dart';
 import 'package:dart_server_application/services/im_services/models/message.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
@@ -16,7 +16,7 @@ import 'base/socket_user_task_center.dart';
 
 /// IM 服务
 class ImService implements ServiceApi {
-  final _taskCenter = SocketUserTaskCenter();
+  final _messageHandle = const SocketMessageHandle();
 
   @override
   Map<String, ServiceAction> get actions => {
@@ -33,11 +33,19 @@ class ImService implements ServiceApi {
     final handler = webSocketHandler((channel, protocol) {
       // 创建一个连接的用户对象
       final user = SocketUser(channel: channel, headers: req.headers);
-      // 创建消息处理
-      final handler = SocketMessageHandle(user);
+      // 创建监听任务
+      final task = SocketUserTask(user, onMessage: _messageHandle.onMessage);
 
       // 加入任务
-      _taskCenter.addSocketUser(SocketUserTask(user, handler: handler));
+      SocketUserTaskCenter().addSocketUser(task);
+
+      // 查询是否有这个用户的离线消息
+      final offlineMessages = OfflineMessageBuffer().getMessagesById(user.id);
+      if (offlineMessages != null && offlineMessages.isNotEmpty) {
+        user.send(jsonEncode(offlineMessages.map((e) => e.toJson()).toList()));
+        // 清除这个用户的离线消息缓存
+        OfflineMessageBuffer().removeMessages(user.id);
+      }
     });
 
     // WebSocket 连接是通过 HTTP 升级请求建立的，可以在处理升级请求时访问 headers
@@ -48,23 +56,18 @@ class ImService implements ServiceApi {
 
   /// 客户端发送消息的接口
   Future<ResultData> send(Request req) async {
-    final bodyString = await req.readAsString(utf8);
-    final body = bodyString.toMap() ?? {};
-    print('收到客户端消息: $body');
-
-    final message = Message.fromJson(body);
-    final userTask = _taskCenter.getUserTaskById(message.to);
-    if (userTask == null) {
-      print('用户 ${message.to} 不存在或者未连接');
-      // TODO 缓存消息，等待对方上线之后统一推送给对方
-    } else {
-      // 对方在线，立即向对方转发消息
-      userTask.user.send(bodyString);
+    try {
+      final messageBody = await req.readAsString(utf8);
+      await _messageHandle.onMessage(ConnectType.http, messageBody);
+      return ResultData.success('ok');
+    } catch (e) {
+      return ResultData.error(e.toString());
     }
-
-    return ResultData.success('ok');
   }
 
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() async {
+    // 删除全部连接任务
+    await SocketUserTaskCenter().removeAll();
+  }
 }

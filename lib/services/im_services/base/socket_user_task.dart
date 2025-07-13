@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dart_server_application/server/base/server_protocol.dart';
 import 'package:dart_server_application/services/im_services/base/socket_user.dart';
+import 'package:dart_server_application/services/im_services/models/message.dart';
 
 abstract class SocketUserTaskDelegate {
   /// 收到了断开连接
@@ -12,17 +13,23 @@ abstract class SocketUserTaskDelegate {
 
 class SocketUserTask implements SocketTask {
   final SocketUser user;
-  final MessageHandle? handler;
+  void Function(ConnectType, String)? onMessage;
   SocketUserTaskDelegate? delegate;
 
-  SocketUserTask(this.user, {this.delegate, this.handler});
+  SocketUserTask(this.user, {this.delegate, this.onMessage});
 
   StreamSubscription? _socketSubscription;
 
   @override
   Future<void> onStart() async {
     _socketSubscription = user.channel.stream.listen(
-      handler?.onMessage,
+      (message) {
+        if (message is String) {
+          onMessage?.call(ConnectType.socket, message);
+        } else {
+          print('消息体不是字符串: $message');
+        }
+      },
       onDone: () {
         print('用户 ${user.id} 断开连接');
         // 回调
