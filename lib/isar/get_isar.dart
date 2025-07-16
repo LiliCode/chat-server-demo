@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:dart_server_application/isar_models/user.dart';
 import 'package:isar/isar.dart';
+
+import 'db_tables.dart';
 
 /// 全局获取 isar 对象
 class GetIsar {
@@ -23,6 +24,13 @@ class GetIsar {
       await directory.create();
     }
 
-    _isar = await Isar.open([UserSchema], directory: directory.path);
+    _isar = await Isar.open(IsarTables.tables, directory: directory.path);
+  }
+
+  /// 关闭数据库连接
+  Future<void> close() async {
+    if ((await _isar?.close()) == true) {
+      _isar = null;
+    }
   }
 }
