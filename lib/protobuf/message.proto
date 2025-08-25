@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package message;
+
+/// 消息协议定义
+message Message {
+  int64 from = 1;   // 发送者ID
+  int64 to = 2; // 接收者ID
+  int64 timestamp = 3;  // 时间戳
+  Command cmd = 4;    // 操作指令
+  string hash = 5;   // 消息唯一标识
+  string body = 6;   // 消息体的 base64 编码
+}
+
+/// 操作指令定义
+enum Command {
+  SEND_MSG = 0; // 发送普通消息
+  RECEIPT = 1; // 消息回执，给服务端的回执，确认已经收到
+  TWO_WAY_DELETION = 2; // 双向删除消息
+  TWO_WAY_CONVERSATION = 3; // 双向删除会话
+  ADD_FRIEND = 4; // 添加好友
+  DELETE_FRIEND = 5; // 删除好友
+  BLOCK = 6; // 拉黑用户
+  UNBLOCK = 7; // 取消拉黑用户
+  UPDATE_CONTACT = 8; // 更新联系人信息
+}
+
+/// 消息体定义
+message MessageBody {
+  string content = 1; // 消息内容的 base64 编码
+  MessageType type = 2; // 消息类型
+  Sender sender = 3; // 发送者信息，单聊可以不使用这个值
+}
+
+/// 消息类型定义
+enum MessageType {
+  SYSTEM = 0;      // 系统消息
+  TEXT = 1;        // 文本消息
+  VOICE = 2;       // 语音消息
+  IMAGE = 3;       // 图片消息
+  VIDEO = 4;       // 视频消息
+  FILE = 5;        // 文件消息
+  GEO = 6;         // 地理位置消息
+}
+
+/// 发送者信息  
+message Sender {
+  int64 id = 1; // 发送者ID
+  string name = 2; // 发送者名称
+  string avatar = 3; // 发送者头像URL
+}
+
+/// 文本消息内容
+message TextMessageContent {
+  string text = 1; // 文本内容
+}
+
+/// 语音消息内容
+message VioceMessageContent {
+  string url = 1; // 语音URL
+  int32 duration = 2; // 语音时长（秒）
+}
+
+/// 图片消息内容
+message ImageMessageContent {
+  string url = 1; // 图片URL
+  float width = 2; // 图片宽度
+  float height = 3; // 图片高度
+}
+
+/// 视频消息内容
+message VideoMessageContent {
+  string url = 1; // 视频URL
+  int32 duration = 2; // 视频时长（秒）
+  float width = 3; // 视频宽度
+  float height = 4; // 视频高度
+}
+
+/// 文件消息内容
+message FileMessageContent {
+  string url = 1; // 文件URL
+  string name = 2; // 文件名称
+  int64 size = 3; // 文件大小（字节）
+}
+
+/// 位置消息内容
+message GeoMessageContent {
+  double latitude = 1; // 纬度
+  double longitude = 2; // 经度
+  string address = 3; // 地址描述
+}
+
+/// 添加好友的请求
+message AddFriendRequest {
+  int64 id = 1; // 请求添加的用户ID
+  string message = 2; // 附加消息
+}
+
+/// 删除消息的请求（双向删除）
+message DeleteMessageRequest {
+  repeated string ids = 1; // 要删除的消息id列表
+}
+
+/// 删除会话的请求（双向删除）
+message DeleteConversationRequest {
+  int64 sessionId = 1; // 对话id
+}
+
+/// 更新联系人信息
+message UpdateContactInfo {
+  int64 id = 1; // 联系人ID
+}

@@ -1,4 +1,4 @@
-import '../models/message.dart';
+import 'package:dart_server_application/protobuf/message.pb.dart';
 
 /// 缓存离线消息
 class OfflineMessageBuffer {
@@ -16,7 +16,13 @@ class OfflineMessageBuffer {
   /// [to] 对方的id
   void storeMessage(Message message, String to) {
     final messageList = _buffer[to];
-    if (messageList != null && messageList.isNotEmpty) {
+    if (messageList != null) {
+      // 查找是否存在这条消息
+      final exists =
+          messageList.where((e) => e.hash == message.hash).isNotEmpty;
+      // 存在这条 hash 的消息就不再存储
+      if (exists) return;
+      // 缓存消息
       messageList.add(message);
     } else {
       // 不存在这个缓存列表，重新创建
@@ -32,5 +38,15 @@ class OfflineMessageBuffer {
   /// 删除对方的离线消息
   ///
   /// [to] 对方的id
-  void removeMessages(String to) => _buffer.remove(to);
+  /// [hash] 消息的 hash 值，为空的时候删除全部消息
+  void removeMessage(String to, {String? hash}) {
+    if (hash == null || hash.isEmpty) {
+      // 删除该用户的全部消息
+      _buffer.remove(to);
+    } else {
+      // 删除指定 hash 的消息
+      final list = getMessagesById(to);
+      list?.removeWhere((element) => element.hash == hash);
+    }
+  }
 }

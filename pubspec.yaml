@@ -15,6 +15,9 @@ dependencies:
 
   isar: ^3.1.0
 
+  # protobuf 支持
+  protobuf: ^4.2.0
+
 dev_dependencies:
   lints: ^2.0.0
   test: ^1.21.0

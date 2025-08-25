@@ -42,9 +42,9 @@ class ImService implements ServiceApi {
       // 查询是否有这个用户的离线消息
       final offlineMessages = OfflineMessageBuffer().getMessagesById(user.id);
       if (offlineMessages != null && offlineMessages.isNotEmpty) {
-        user.send(jsonEncode(offlineMessages.map((e) => e.toJson()).toList()));
-        // 清除这个用户的离线消息缓存
-        OfflineMessageBuffer().removeMessages(user.id);
+        // 发送给用户
+        user.send(jsonEncode(
+            offlineMessages.map((e) => e.writeToJsonMap()).toList()));
       }
     });
 
