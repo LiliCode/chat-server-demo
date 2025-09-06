@@ -22,12 +22,13 @@ class SocketMessageHandle implements MessageHandle {
         SocketUserTaskCenter().getUserTaskById(message.to.toString());
     if (userTask == null) {
       // 检查是否存在这个用户
-      final count = await GetIsar()
-          .instance
-          .users
-          .where()
-          .idEqualTo(int.tryParse(message.to.toString()) ?? 0)
-          .count();
+      final count = await GetIsar().call<int>((isar) async {
+        return await isar.users
+            .where()
+            .idEqualTo(int.tryParse(message.to.toString()) ?? 0)
+            .count();
+      });
+
       if (count > 0) {
         print('用户 ${message.to} 离线，将要缓存离线消息');
         OfflineMessageBuffer().storeMessage(message, message.to.toString());

@@ -29,7 +29,10 @@ class SocketUserTaskCenter implements SocketUserTaskDelegate {
     }
 
     // 检查是否存在这个用户
-    final user = await GetIsar().instance.users.get(int.tryParse(id) ?? 0);
+    final user = await GetIsar().call<User?>((isar) async {
+      return await isar.users.get(int.tryParse(id) ?? 0);
+    });
+
     if (user == null) {
       await task.user.disconnect(status: SocketStatusCode.userNotExists);
       return;

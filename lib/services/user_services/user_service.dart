@@ -33,23 +33,20 @@ class UserService implements ServiceApi {
 
     User? user;
     if (account != null) {
-      final results = await GetIsar()
-          .instance
-          .users
-          .filter()
-          .accountEqualTo(account)
-          .findAll();
+      final results = await GetIsar().call<List<User>>((isar) async {
+        return await isar.users.filter().accountEqualTo(account).findAll();
+      });
 
       if (results.isNotEmpty) {
         user = results.first;
       }
     } else if (id != null) {
-      final results = await GetIsar()
-          .instance
-          .users
-          .filter()
-          .idEqualTo(int.tryParse(id) ?? -1)
-          .findAll();
+      final results = await GetIsar().call<List<User>>((isar) async {
+        return await isar.users
+            .filter()
+            .idEqualTo(int.tryParse(id) ?? -1)
+            .findAll();
+      });
 
       if (results.isNotEmpty) {
         user = results.first;
@@ -74,12 +71,9 @@ class UserService implements ServiceApi {
     final pwd = '${params['password'] ?? ''}';
 
     if (account.isNotEmpty && pwd.isNotEmpty) {
-      final results = await GetIsar()
-          .instance
-          .users
-          .filter()
-          .accountEqualTo(account)
-          .findAll();
+      final results = await GetIsar().call<List<User>>((isar) async {
+        return await isar.users.filter().accountEqualTo(account).findAll();
+      });
 
       if (results.isEmpty) {
         return ResultData.error('用户不存在!');
@@ -122,8 +116,10 @@ class UserService implements ServiceApi {
     }
 
     // 查找是否存在这个用户名的用户
-    final count =
-        await GetIsar().instance.users.filter().accountEqualTo(account).count();
+    final count = await GetIsar().call<int>((isar) async {
+      return await isar.users.filter().accountEqualTo(account).count();
+    });
+
     if (count > 0) {
       return ResultData.error('用户名存在，请更改用户名');
     }
@@ -141,8 +137,11 @@ class UserService implements ServiceApi {
 
     final user =
         User(name: name, account: account, password: password, avatar: avatar);
-    await GetIsar().instance.writeTxn(() async {
-      await GetIsar().instance.users.put(user);
+
+    await GetIsar().call<void>((isar) async {
+      await isar.writeTxn(() async {
+        await isar.users.put(user);
+      });
     });
 
     return ResultData.success({'msg': '注册成功'});
